@@ -55,14 +55,15 @@ module ActiveRecord
               base.validate :#{name}_must_be_valid
               base.alias_method_chain :#{name}, :autobuild
 
-
               base.extend ActiveRecord::ActsAsRelation::AccessMethods
-              attributes = #{class_name}.content_columns.map(&:name)
 
-              associations = #{class_name}.reflect_on_all_associations.map(&:name)
-              ignored = ["created_at", "updated_at", "#{association_name}_id", "#{association_name}_type", "#{association_name}"]
-              attributes_to_delegate = attributes + associations - ignored
-              base.send :define_acts_as_accessors, attributes_to_delegate, "#{name}"
+              if #{class_name}.table_exists?
+                attributes = #{class_name}.content_columns.map(&:name)
+                associations = #{class_name}.reflect_on_all_associations.map(&:name)
+                ignored = ["created_at", "updated_at", "#{association_name}_id", "#{association_name}_type", "#{association_name}"]
+                attributes_to_delegate = attributes + associations - ignored
+                base.send :define_acts_as_accessors, attributes_to_delegate, "#{name}"
+              end
 
               base.attr_accessible.update(#{class_name}.attr_accessible)
             end
